@@ -1,4 +1,4 @@
-function [K,F] = VEM(mesh,f)
+function [K,F,out] = VEM(mesh,f)
 % VEM assembles the stiffness matrix and right-hand side for Poisson
 % equation with the Virtual Element Method.
 % This code is a modification of the code introduced in 
@@ -9,6 +9,7 @@ ndof = size(mesh.verts, 1); n_polys = 3; % Method has 1 degree of freedom per ve
 % vectors to store sparse matrix
 numStore = cellfun(@numel,mesh.elems);
 numStore = sum(numStore.^2);
+proj = cell(size(mesh.elems,1),1); % projections for error estimates
 ii = nan(numStore,1); jj = nan(numStore,1); ss = nan(numStore,1); pt = 0;
 F  = zeros(ndof, 1); % Forcing vector
 linear_polynomials = {[0,0], [1,0], [0,1]}; % Impose an ordering on the linear polynomials
@@ -41,6 +42,7 @@ for el_id = 1:length(mesh.elems) %
         end
     end
     projector = (B*D)\B; % Compute the local Ritz projector to polynomials
+    proj{el_id} = projector;
     stabilising_term = (eye(n_sides) - D * projector)' * (eye(n_sides) - D * projector);
     G = B*D; G(1, :) = 0;
     local_stiffness = (projector' * G * projector + stabilising_term);
@@ -53,4 +55,8 @@ for el_id = 1:length(mesh.elems) %
     F(vert_ids) = F(vert_ids) + f(centroid(1),centroid(2)) * area/n_sides;
 end
 K = sparse(ii,jj,ss,ndof,ndof);
+
+
+% save struct with info for L2-error
+out = struct('mesh',mesh,'proj',{proj},'polys',linear_polynomials);
 end
