@@ -1,9 +1,19 @@
-function [AVEM,ASSEVEM,b] = SSEVEM(mesh,rhs,varargin)
+function [AVEM,ASSEVEM,b,out,Ast] = SSEVEM(mesh,rhs,varargin)
+if(size(varargin,2)==1)
+    rho = varargin{1};
+else
+    rho = ones(size(mesh.elems,1),1);
+end
+
 
 NN = size(mesh.verts,1);
 NT = size(mesh.elems,1);
 %
-[AVEM,b,~,~,PP,stab,area,diam] = vem(mesh,rhs,rho);
+[AVEM,b,PP,stab,area,diam] = VEM(mesh,rhs,rho);
+out.proj = PP;
+out.mesh = mesh;
+out.polys = [0 0; 1 0; 0 1];
+
 
 nmax = max(cellfun(@numel,mesh.elems));
 numStore = nmax*(nmax-1)*NT;
@@ -120,6 +130,8 @@ ASSEVEM = sparse(ii,jj,ss,NN,NN) + stab; %%%%%%%%
 ASSEVEM(mesh.bdNodes,:) = 0;
 ASSEVEM(:,mesh.bdNodes) = 0;
 ASSEVEM(mesh.bdNodes,mesh.bdNodes) = speye(numel(mesh.bdNodes));
+
+Ast = AVEM-stab;
 
 % lado derecho, no cambia
 %barycenter = (mesh.verts(elems(:,1),:)+mesh.verts(elems(:,2),:)+mesh.verts(elems(:,3),:))/3;

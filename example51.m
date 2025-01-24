@@ -77,7 +77,7 @@ for idFile = 1:numFiles
     uSFEM = zeros(size(mesh.verts,1),1);
     uSFEM(inNode) = ASFEM(inNode,inNode)\b(inNode);
     % compute L2-errors
-    [~,~,out]   = VEM(mesh,f);
+    [~,~,~,~,~,~,out]   = VEM(mesh,f);
     errLIESFEM1(pt+1) = getL2Error(out,uex,uSFEM);
     %norm(uSFEM-uex(mesh.verts(:,1),mesh.verts(:,2)),'inf');%getL2Error_tria(uex,mesh,uFEM);
     % compute diam
@@ -103,7 +103,7 @@ for idFile = 1:numFiles
     uSFEM = zeros(size(mesh.verts,1),1);
     uSFEM(inNode) = ASFEM(inNode,inNode)\b(inNode);
     % compute L2-errors
-    [~,~,out]   = VEM(mesh,f);
+    [~,~,~,~,~,~,out]   = VEM(mesh,f);
     errLIESFEM2(pt+1) = getL2Error(out,uex,uSFEM);
     %norm(uSFEM-uex(mesh.verts(:,1),mesh.verts(:,2)),'inf');%getL2Error_tria(uex,mesh,uFEM);
     % compute diam
@@ -125,7 +125,7 @@ for idFile = 1:numFiles
     % compute boundary nodes
     inNode = setdiff(1:size(mesh.verts,1),mesh.bdNode);
     % assemble matrix and rhs for VEM and solve for interior nodes
-    [AVEM,b,out]   = VEM(mesh,f);
+    [AVEM,b,~,~,~,~,out]   = VEM(mesh,f);
     % VEM solution
     uVEM = zeros(size(mesh.verts,1),1);
     uVEM(inNode) = AVEM(inNode,inNode)\b(inNode);
@@ -150,7 +150,7 @@ for idFile = 1:numFiles
     % compute boundary nodes
     inNode = setdiff(1:size(mesh.verts,1),mesh.bdNode);
     % assemble matrix and rhs for VEM and solve for interior nodes
-    [AVEM,b,out]   = VEM(mesh,f);
+    [AVEM,b,~,~,~,~,out]   = VEM(mesh,f);
     % VEM solution
     uVEM = zeros(size(mesh.verts,1),1);
     uVEM(inNode) = AVEM(inNode,inNode)\b(inNode);
