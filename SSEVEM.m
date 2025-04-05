@@ -1,4 +1,4 @@
-function [AVEM,ASSEVEM,b,out,Ast] = SSEVEM(mesh,rhs,varargin)
+function [AVEM,ASSEVEM,b,out] = SSEVEM(mesh,rhs,varargin)
 if(size(varargin,2)==1)
     rho = varargin{1};
 else
@@ -49,7 +49,7 @@ for elemID = 1:NT
             gradEdgj = nan(numel(edges),2);
             for edg = 1:numel(edges)               
                 % find triangles that share edg
-                if(neighs(edg,1)~=neighs(edg,2)) % dos vecinos
+                if(neighs(edg,1)~=neighs(edg,2)) % two neighborhs
                     t1 = neighs(edg,1);
                     nodest1 = mesh.elems{t1};
                     t2 = neighs(edg,2);
@@ -57,26 +57,26 @@ for elemID = 1:NT
                     % phi_i with t1 and t2
                     ind = nodest1 == ni;
                     if(sum(ind)>0)
-                        gradi1 = PP{t1}(2:3,ind)'/diam(t1);%Dlambda(t1,:,ind);
+                        gradi1 = PP{t1}(2:3,ind)'/diam(t1);
                     else
                         gradi1 = [0 0];
                     end
                     ind = nodest2 == ni;
                     if(sum(ind)>0)
-                        gradi2 = PP{t2}(2:3,ind)'/diam(t2);%Dlambda(t2,:,ind);
+                        gradi2 = PP{t2}(2:3,ind)'/diam(t2);
                     else
                         gradi2 = [0 0];
                     end
                     % phi_j with t1 and t2
                     ind = nodest1 == nj;
                     if(sum(ind)>0)
-                        gradj1 = PP{t1}(2:3,ind)'/diam(t1);%Dlambda(t1,:,ind);
+                        gradj1 = PP{t1}(2:3,ind)'/diam(t1);
                     else
                         gradj1 = [0 0];
                     end
                     ind = nodest2 == nj;
                     if(sum(ind)>0)
-                        gradj2 = PP{t2}(2:3,ind)'/diam(t2);%Dlambda(t2,:,ind);
+                        gradj2 = PP{t2}(2:3,ind)'/diam(t2);
                     else
                         gradj2 = [0 0];
                     end
@@ -85,20 +85,20 @@ for elemID = 1:NT
                     w2 = area(t2)/(area(t1)+area(t2));
                     gradEdgi(edg,:) = w1*gradi1+w2*gradi2;
                     gradEdgj(edg,:) = w1*gradj1+w2*gradj2;
-                else                    % un vecino - mismo gradiente - FALTA
+                else                    % one neighbor
                     t1 = neighs(edg,1);
                     nodest1 = mesh.elems{t1};
                     % phi_i with t1
                     ind = nodest1 == ni;
                     if(sum(ind)>0)
-                        gradi1 = PP{t1}(2:3,ind)'/diam(t1);%Dlambda(t1,:,ind);
+                        gradi1 = PP{t1}(2:3,ind)'/diam(t1);
                     else
                         gradi1 = [0 0];
                     end
                     % phi_j with t1
                     ind = nodest1 == nj;
                     if(sum(ind)>0)
-                        gradj1 = PP{t1}(2:3,ind)'/diam(t1);%Dlambda(t1,:,ind);
+                        gradj1 = PP{t1}(2:3,ind)'/diam(t1);
                     else
                         gradj1 = [0 0];
                     end
@@ -108,8 +108,8 @@ for elemID = 1:NT
                 end
             end
             % averages for each pair of consecutives edges
-            %gradEdgi = (gradEdgi([2:end 1],:)+gradEdgi)/2;
-            %gradEdgj = (gradEdgj([2:end 1],:)+gradEdgj)/2;
+            gradEdgi = (gradEdgi([2:end 1],:)+gradEdgi)/2;
+            gradEdgj = (gradEdgj([2:end 1],:)+gradEdgj)/2;
             % approx for integral
             valij = area(elemID)*sum(sum(gradEdgi.*gradEdgj,2))/size(gradEdgi,1);
             Aloc(i,j) = valij;
@@ -126,17 +126,9 @@ for elemID = 1:NT
     pt = pt + adv;
 end
 ii = ii(1:pt); jj = jj(1:pt); ss = ss(1:pt);
-ASSEVEM = sparse(ii,jj,ss,NN,NN) + stab; %%%%%%%%
+ASSEVEM = sparse(ii,jj,ss,NN,NN) + stab;
 ASSEVEM(mesh.bdNodes,:) = 0;
 ASSEVEM(:,mesh.bdNodes) = 0;
 ASSEVEM(mesh.bdNodes,mesh.bdNodes) = speye(numel(mesh.bdNodes));
-
-Ast = AVEM-stab;
-
-% lado derecho, no cambia
-%barycenter = (mesh.verts(elems(:,1),:)+mesh.verts(elems(:,2),:)+mesh.verts(elems(:,3),:))/3;
-%bt = f(barycenter(:,1),barycenter(:,2))/3;
-%bt = bt.*repmat(area,1,3);
-%b = accumarray(elems(:),bt(:),[NN 1]);
 
 end

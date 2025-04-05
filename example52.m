@@ -20,7 +20,7 @@ for idFile = 1:numFiles
     % exact solution at nodes
     ue = uex(mesh.verts(:,1),mesh.verts(:,2));
     % assemble matrix and rhs for VEM and SSE-VEM
-    [AVEM,ASSEVEM,b,out,A2] = SSEVEM(mesh,f);
+    [AVEM,ASSEVEM,b,out] = SSEVEM(mesh,f);
     % SSE-VEM solution
     freeNode = setdiff(1:size(mesh.verts,1),mesh.bdNodes)';
     u = zeros(size(mesh.verts,1),1);
@@ -54,7 +54,7 @@ for idFile = 1:numFiles
     % exact solution at nodes
     ue = uex(mesh.verts(:,1),mesh.verts(:,2));
     % assemble matrix and rhs for VEM and SSE-VEM
-    [AVEM,ASSEVEM,b,out,A2] = SSEVEM(mesh,f);
+    [AVEM,ASSEVEM,b,out] = SSEVEM(mesh,f);
     % SSE-VEM solution
     freeNode = setdiff(1:size(mesh.verts,1),mesh.bdNodes)';
     u = zeros(size(mesh.verts,1),1);
